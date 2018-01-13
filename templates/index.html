@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<head>
+  <title>LCC Lowest Ticket Fare Search</title>
+  <meta charset="utf-8">
+  <!-- Required for altair -->
+  <script src="https://d3js.org/d3.v3.min.js" integrity="sha384-N8EP0Yml0jN7e0DcXlZ6rt+iqKU9Ck6f1ZQ+j2puxatnBq4k9E8Q6vqBcY34LNbn" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/2.6.5/vega.min.js" integrity="sha384-8dJFJ/XyQ08HfL3n5ceeyelhGlLM8xxH76K9jW0zcOtHyrfl3f+jK13Ha+XNhzY5" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/1.2.1/vega-lite.min.js" integrity="sha384-n4svbFBWxpAhvheJa34Vsw32AiWrdEclAyFcNWTvpJeRsIrhB+wtNwQ3rr3McsYU" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/2.2.0/vega-embed.min.js" integrity="sha384-Bilk4JnDarwK8aZiVo581eO/Zum/wxMv5GC+K/YEkS58dLcSsDXf216GiKQmImjd" crossorigin="anonymous"></script>
+  <!-- Required for plotly -->
+  <script src="https://cdn.plot.ly/plotly-1.32.0.min.js" integrity="sha384-kuu2ods/WCOo3EpExEoYGZGqdBdbl7cLvT+xz7d5SG49hKLHQ702qnRuL+qsZix3" crossorigin="anonymous"></script>
+  <!-- Required for bootstrap -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+  <!-- Required for bootstrap datepicker -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js" integrity="sha384-w48xMCwgWQu0zb3PvQI/rK5lfN6G+lSWu+qI4ukKZg3I5Xx3/VWA8IiaQ8O7tZur" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker3.min.css" integrity="sha384-CuqHLZbw4yxoE4YzgqWDF9Xrv8YfD8Y20i+/gwL3e1+fYEj0wjLBmkCotf113/g/" crossorigin="anonymous">
+  <!-- Required for select2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" integrity="sha384-RdQbeSCGSeSdSlTMGnUr2oDJZzOuGjJAkQy1MbKMu8fZT5G0qlBajY0n0sY/hKMK" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js" integrity="sha384-uQwKPrmNkEOvI7rrNdCSs6oS1F3GvnZkmPtkntOSIiPQN4CCbFSxv+Bj6qe0mWDb" crossorigin="anonymous"></script>
+  <!-- Required for bootstrap theme in select2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha384-gmcw+R0EXbFmHe5f/e/UutiOrxubA/LkUzBVH0Y7uvP+IqhUSNFp7HZKD6ztR12u" crossorigin="anonymous">
+  <!-- Required for open-iconic -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" integrity="sha384-wWci3BOzr88l+HNsAtr3+e5bk9qh5KfjU6gl/rbzfTYdsAVHBEbxB33veLYmFg/a" crossorigin="anonymous">
+  <link rel="stylesheet" href="{{url_for('static', filename='spinner.css')}}">
+
+  <style media="screen">
+    /* Add space between vega-embed links  */
+    .vega-actions a {
+      margin-right: 5px;
+    }
+
+    .full-width{
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <h3>
+        Low-cost Carrier lowest ticket fare search
+      </h3>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-6 alert alert-danger text-center" role="danger">
+        <span class="oi oi-warning" title="warning" aria-hidden="true"></span>&nbsp;Sorry! Searching for ticket fares of <strong>Scoot</strong> and <strong>Peach Aviation</strong> is not available due to some technical problems
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-6">
+        <div class="row justify-content-center">
+          <div class="col-3 pl-1 pr-1">
+            <label for="sltFrom" class="full-width">
+              From
+              <select class="js-example-basic-single js-states form-control" name="from" id="sltFrom">
+                <option></option>
+              </select>
+            </label>
+          </div>
+          <div class="col-3 pl-1 pr-1">
+            <label for="sltTo" class="full-width">
+              To
+              <select class="js-example-basic-single js-states form-control" name="to" id="sltTo">
+              </select>
+            </label>
+          </div>
+          <div class="col-3 pl-1 pr-1">
+            <label for="optAirlines" class="full-width">
+              Airlines
+              <select multiple class="form-control" id="optAirlines">
+              </select>
+            </label>
+          </div>
+          <div class="col-2 pl-1 pr-1">
+            <label for="txtMonth" class="full-width">
+              Month
+              <div class="input-group date">
+                <input type="text" class="form-control" id="txtMonth"><span class="input-group-addon"><span class="oi oi-calendar" title="calendar" aria-hidden="true"></span></span>
+              </div>
+            </label>
+          </div>
+          <div class="col-1 pl-1 pr-1">
+            <label for="btnSearch" class="full-width">
+              &nbsp;
+              <button type="button" class="btn btn-primary" id="btnSearch">Search</button>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="loader" style="display:none;"></div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-3 alert alert-info text-center" role="info" id="altCurrency" style="display:none;">
+        <span class="oi oi-info" title="info" aria-hidden="true"></span>&nbsp;The following prices are displayed in <strong id="currency"></strong>
+      </div>
+      <div class="w-100"></div>
+      <!-- Container for the visualization -->
+      <div id="vis"></div>
+      <div class="w-100"></div>
+      <div id="table"></div>
+    </div>
+  </div>
+  <script>
+    var vlSpec, embedSpec;
+
+    $('.input-group.date').datepicker({
+      format: "yyyy-mm",
+      startDate: "0d",
+      endDate: "+6m",
+      startView: 1,
+      minViewMode: 1,
+      maxViewMode: 2,
+      autoclose: true
+    });
+  
+    var airportCodes;
+  
+    $.ajax({
+      url: '/airport_codes',
+      data: {
+        'id': 'ALL'
+      },
+      type: 'POST',
+      dataType: 'json',
+      async: false,
+      success: function (response) {
+        airportCodes = response;
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        alert('error: ' + errorThrown);
+      }
+    });
+  
+    $('#sltFrom').select2({
+      theme: 'bootstrap',
+      dropdownAutoWidth: true,
+      data: airportCodes,
+      placeholder: 'Select an airport',
+      allowClear: true
+    });
+  
+    $('#sltTo').select2({
+      theme: 'bootstrap',
+      placeholder: 'Select an airport'
+    });
+  
+    $('#sltFrom').on('change', function () {
+      $.ajax({
+        url: '/airport_codes',
+        data: {
+          'id': $('#sltFrom').val()
+        },
+        type: 'POST',
+        dataType: 'json',
+        async: false,
+        success: function (response) {
+          $('#sltTo').empty();
+          $('#sltTo').append($('<option>')).select2({
+            theme: 'bootstrap',
+            dropdownAutoWidth: true,
+            data: response,
+            placeholder: 'Select an airport',
+            allowClear: true
+          });
+          $('#optAirlines').empty();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert('error: ' + errorThrown);
+        }
+      });
+    });
+  
+    $('#sltTo').on('change', function () {
+      $.ajax({
+        url: '/airlines',
+        data: {
+          'fromId': $('#sltFrom').val(),
+          'toId': $('#sltTo').val()
+        },
+        type: 'POST',
+        dataType: 'json',
+        async: false,
+        success: function (response) {
+          $('#optAirlines').empty();
+          $.each(response, function (i, airline) {
+            $('#optAirlines').append($('<option>', {
+              value: airline.id,
+              text: airline.name,
+              disabled: airline.id == 3 || airline.id == 4
+            }));
+          });
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert('error: ' + errorThrown);
+        }
+      });
+    });
+  
+    $('.container-fluid').on('change', function () {
+      if ($('#sltFrom').val() != '' && $('#sltTo').val() != '' && $('#optAirlines :selected').length > 0 && $('#txtMonth').val() != '') {
+        $('#btnSearch').prop('disabled', false);
+      }
+    });
+  
+    $('#btnSearch').prop('disabled', true)
+      .on('click', function () {
+        $.ajax({
+          url: '/data',
+          data: {
+            'month': $('#txtMonth').val(),
+            'fromId': $('#sltFrom').val(),
+            'toId': $('#sltTo').val(),
+            'airlines': $('#optAirlines').val().join(',')
+          },
+          type: 'POST',
+          dataType: 'json',
+          async: true,
+          beforeSend: function () {
+            $('#altCurrency').hide();
+            $('.loader').show();
+            $('#btnSearch').prop('disabled', true);
+            $('#vis, #table').empty();
+          },
+          complete: function () {
+            $('.loader').hide();
+            $('#btnSearch').prop('disabled', false);
+          },
+          success: function (response) {
+            $('#currency').text(response.currency);
+            $('#altCurrency').show();
+            vlSpec = JSON.parse(response.line);
+  
+            embedSpec = {
+              mode: "vega-lite", // Instruct Vega-Embed to use the Vega-Lite compiler
+              spec: vlSpec
+            };
+            // Embed the visualization in the container with id `vis`
+            vg.embed("#vis", embedSpec, function (error, result) {
+              // Callback receiving the View instance and parsed Vega spec
+              // result.view is the View, which resides under the '#vis' element
+            });
+            $('#table').append(response.table);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            alert('error: ' + errorThrown);
+          }
+        });
+      });
+  </script>
+</body>
+</html>
